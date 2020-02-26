@@ -11,6 +11,7 @@ class App extends PureComponent {
     this.state = {
       clients: [],
       columns: [],
+      samples: [],
     }
     this.handleActivate = this.handleActivate.bind(this);
     this.clientDisconnected = this.clientDisconnected.bind(this);
@@ -46,6 +47,9 @@ class App extends PureComponent {
     const socket = io('http://192.168.10.242:9955');
     socket.on('clientDisconnected', this.clientDisconnected); 
     socket.on('clientConnected', this.clientConnected); 
+    socket.on('newSamplesAdded', (samples) => {
+      this.setState({ samples });
+    });
     socket.on('connect', () => {
       console.log('connected');
       socket.emit('onUIConnect', 'MY MESSAGE');
@@ -63,7 +67,7 @@ class App extends PureComponent {
   };
 
   render() {
-    const { columns, clients } = this.state;
+    const { columns, clients, samples } = this.state;
 
     if (columns.length && clients.length) {
       return (
@@ -90,6 +94,7 @@ class App extends PureComponent {
               })}
             </tbody>
           </table>
+          {samples.map(s => <div>{s}</div>)}
         </div>
       );
     }
