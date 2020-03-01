@@ -48,7 +48,14 @@ class App extends PureComponent {
     socket.on('clientDisconnected', this.clientDisconnected); 
     socket.on('clientConnected', this.clientConnected); 
     socket.on('newSamplesAdded', (samples) => {
-      this.setState({ samples });
+      console.log('samples received: ', samples);
+      this.setState({
+        samples: [
+          ...samples,
+          ...this.state.samples.slice(0, 40),
+        ]
+      });
+      // this.setState({ samples });
     });
     socket.on('connect', () => {
       console.log('connected');
@@ -68,6 +75,32 @@ class App extends PureComponent {
 
   render() {
     const { columns, clients, samples } = this.state;
+
+    const renderSamplesTables = () => {
+      if (samples.length > 0) {
+        return (
+          <table border={1}>
+            <thead> 
+              <tr>
+                {Object.keys(samples[0]).map(col => <th>{col}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {samples.map(s => {
+                return (
+                  <tr>
+                    {Object.values(s).map(d => <td>{d !== null ? d.toString() : 'null' }</td>)}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        );
+      }
+      return (
+        <div>no new samples</div>
+      );
+    }
 
     if (columns.length && clients.length) {
       return (
@@ -94,7 +127,8 @@ class App extends PureComponent {
               })}
             </tbody>
           </table>
-          {samples.map(s => <div>{s}</div>)}
+          <h1>samples feed</h1>
+          {renderSamplesTables()}
         </div>
       );
     }
